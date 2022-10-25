@@ -9,7 +9,7 @@ as you want it should not lock the log file even in multi-threaded applications.
 ## Usage
 
 ```python
-from Logger import Logger
+from Logger.Logger import Logger
 
 log_file = 'test.log'
 logger = Logger(log_file).get_logger()
