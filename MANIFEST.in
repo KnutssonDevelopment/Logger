@@ -1,1 +1,2 @@
-include README.md
+include Logger/README.md
+include Logger/Logger.py
