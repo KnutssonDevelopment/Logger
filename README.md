@@ -7,8 +7,9 @@ The logger function is defined as a singleton so you can load it as many times
 as you want it should not lock the log file even in multi-threaded applications.
 
 ## Usage
+
 ```python
-from Logger.Logger import Logger
+from Logger import Logger
 
 log_file = 'test.log'
 logger = Logger(log_file).get_logger()
