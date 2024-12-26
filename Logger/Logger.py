@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 
 class Singleton(type):
@@ -9,6 +10,28 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
 
         return cls._instances[cls]
+
+
+class DatabaseLogHandler(logging.Handler):
+    """A logging handler that logs messages to a database."""
+
+    def __init__(self, db):
+        super().__init__()
+        self.db = db
+
+    def emit(self, record):
+        """Log a record to the database."""
+        try:
+            # Extract the severity and message directly from the record
+            severity = record.levelname
+            message = record.getMessage()  # This gets the log message without any formatting
+
+            # Assuming the database's add_log_entry method can handle severity and message as separate arguments
+            # Here, we don't need to format them together or include a timestamp, as the database will handle it
+            self.db.add_log_entry(severity, message)
+        except Exception as e:
+            # Handle any errors during logging to database
+            print(f"Failed to log to database: {e}")
 
 
 class CustomFormatter(logging.Formatter):
@@ -35,13 +58,11 @@ class CustomFormatter(logging.Formatter):
 
 class Logger(metaclass=Singleton):
     """ Logging class to log in a controlled fashion."""
-    def __init__(self, log_file: str):
-        from pathlib import Path
-
+    def __init__(self, log_file: str, database=None):
         # Create Data dir if it does not exist
         Path(Path(log_file).parent).mkdir(parents=True, exist_ok=True)
 
-        LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
+        LOG_FORMAT = "%(asctime)s %(levelname)s - %(message)s"
         logging.root.setLevel(logging.DEBUG)
 
         logging.basicConfig(filename=Path(log_file).as_posix(),
@@ -53,9 +74,14 @@ class Logger(metaclass=Singleton):
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         console.setFormatter(CustomFormatter())
+        self.logger = logging.getLogger('root')
         logging.getLogger().addHandler(console)
 
-        self.logger = logging.getLogger('root')
+        if database is not None:
+            db_handler = DatabaseLogHandler(database)
+            db_handler.setLevel(logging.INFO)  # Adjust as needed
+            db_handler.setFormatter(CustomFormatter())  # Use the custom formatter for the database logs
+            self.logger.addHandler(db_handler)
 
     def get_logger(self):
         return self.logger
