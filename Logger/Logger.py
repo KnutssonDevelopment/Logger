@@ -26,6 +26,10 @@ class DatabaseLogHandler(logging.Handler):
             severity = record.levelname
             message = record.getMessage()  # This gets the log message without any formatting
 
+            # Truncate the message if it exceeds the column limit
+            if len(message) > 8192:
+                message = message[:8192]
+
             # Assuming the database's add_log_entry method can handle severity and message as separate arguments
             # Here, we don't need to format them together or include a timestamp, as the database will handle it
             self.db.add_log_entry(severity, message)
