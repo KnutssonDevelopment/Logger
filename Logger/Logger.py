@@ -1,4 +1,5 @@
 import logging
+import sys
 from pathlib import Path
 
 
@@ -75,7 +76,7 @@ class Logger(metaclass=Singleton):
                             filemode='a'
                             )
 
-        console = logging.StreamHandler()
+        console = logging.StreamHandler(stream=sys.stdout)
         console.setLevel(logging.INFO)
         console.setFormatter(CustomFormatter())
         self.logger = logging.getLogger('root')
